@@ -1,0 +1,75 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Menu Item Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+    <div th:replace="~{navbar :: navbar}"></div>
+    <div class="container mx-auto p-4">
+        <h1 class="text-2xl font-bold mb-4" th:text="${platMenu.id} ? 'Edit Menu Item' : 'Add Menu Item'"></h1>
+        <form th:action="@{/platmenus}" th:object="${platMenu}" method="post" class="bg-white p-4 shadow-md rounded">
+            <input type="hidden" th:field="*{id.idPlat}">
+            <input type="hidden" th:field="*{id.idMenu}">
+            <div class="mb-4">
+                <label class="block text-sm font-bold mb-2">Dish</label>
+                <select th:field="*{plat}" class="w-full p-2 border rounded" required>
+                    <option th:each="plat : ${plats}" th:value="${plat}" th:text="${plat.name}"></option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold mb-2">Menu</label>
+                <select th:field="*{menu}" class="w-full p-2 border rounded" required>
+                    <option th:each="menu : ${menus}" th:value="${menu}" th:text="${menu.name}"></option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold mb-2">Quantity</label>
+                <input type="number" th:field="*{quantity}" class="w-full p-2 border rounded" required>
+            </div>
+            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Save</button>
+            <a th:href="@{/platmenus}" class="bg-gray-500 text-white px-4 py-2 rounded ml-2">Cancel</a>
+        </form>
+    </div>
+</body>
+</html>

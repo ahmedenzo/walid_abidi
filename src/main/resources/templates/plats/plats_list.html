@@ -1,0 +1,90 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Dish List</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+</head>
+<body class="bg-gray-100 min-h-screen">
+<div th:replace="~{navbar :: navbar}"></div>
+<div class="container mx-auto px-4 py-6">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Dish List</h1>
+    <div class="mb-4">
+        <a th:href="@{/plats/new}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded shadow inline-flex items-center">
+            ➕ <span class="ml-2">Add New Dish</span>
+        </a>
+    </div>
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <table class="min-w-full table-auto">
+            <thead class="bg-gray-200 text-gray-700 uppercase text-sm">
+            <tr>
+                <th class="py-3 px-6 text-left">ID</th>
+                <th class="py-3 px-6 text-left">Name</th>
+                <th class="py-3 px-6 text-left">Price</th>
+                <th class="py-3 px-6 text-left">Description</th>
+                <th class="py-3 px-6 text-left">Review</th>
+                <th class="py-3 px-6 text-center">Actions</th>
+            </tr>
+            </thead>
+            <tbody class="text-gray-600 text-sm">
+            <tr th:each="plat : ${plats}" class="border-b hover:bg-gray-50 transition">
+                <td class="py-3 px-6" th:text="${plat.idPlat}"></td>
+                <td class="py-3 px-6" th:text="${plat.name}"></td>
+                <td class="py-3 px-6" th:text="${plat.prixPlat}"></td>
+                <td class="py-3 px-6" th:text="${plat.description}"></td>
+                <td class="py-3 px-6" th:text="${plat.avis}"></td>
+                <td class="py-3 px-6 text-center">
+                    <a th:href="@{/plats/edit/{id}(id=${plat.idPlat})}" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm mr-2">
+                        Edit
+                    </a>
+                    <a th:href="@{/plats/delete/{id}(id=${plat.idPlat})}" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm">
+                        Delete
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
