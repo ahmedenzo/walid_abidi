@@ -52,9 +52,13 @@
             <input type="hidden" th:field="*{idCmd}">
             <div class="mb-4">
                 <label class="block text-sm font-bold mb-2">Client</label>
-                <select th:field="*{client}" class="w-full p-2 border rounded" required>
-                    <option th:each="client : ${clients}" th:value="${client}" th:text="${client.firstName + ' ' + client.lastName}"></option>
+                <select name="client.idClient">
+                    <option th:each="client : ${clients}"
+                            th:value="${client.idClient}"
+                            th:text="${client.firstName + ' ' + client.lastName}">
+                    </option>
                 </select>
+
             </div>
             <div class="mb-4">
                 <label class="block text-sm font-bold mb-2">Date</label>

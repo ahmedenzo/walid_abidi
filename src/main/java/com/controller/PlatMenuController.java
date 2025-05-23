@@ -1,6 +1,8 @@
 package com.controller;
 
 
+import com.model.Menu;
+import com.model.Plat;
 import com.model.PlatMenu;
 import com.model.PlatMenuId;
 import com.service.MenuService;
@@ -37,10 +39,29 @@ public class PlatMenuController {
     }
 
     @PostMapping
-    public String savePlatMenu(@ModelAttribute PlatMenu platMenu) {
+    public String savePlatMenu(@RequestParam("platId") Integer platId,
+                               @RequestParam("menuId") Integer menuId,
+                               @RequestParam("quantity") Integer quantity) {
+
+        Plat plat = platService.getPlatById(platId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid plat ID: " + platId));
+        Menu menu = menuService.getMenuById(menuId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid menu ID: " + menuId));
+
+        PlatMenuId id = new PlatMenuId();
+        id.setIdPlat(platId);
+        id.setIdMenu(menuId);
+
+        PlatMenu platMenu = new PlatMenu();
+        platMenu.setId(id);
+        platMenu.setPlat(plat);
+        platMenu.setMenu(menu);
+        platMenu.setQuantity(quantity);
+
         platMenuService.savePlatMenu(platMenu);
         return "redirect:/platmenus";
     }
+
 
     // Dans PlatMenuController
     @GetMapping("/edit/{idPlat}/{idMenu}")

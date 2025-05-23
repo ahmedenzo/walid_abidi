@@ -1,6 +1,8 @@
 package com.controller;
 
 
+import com.model.Client;
+import com.model.Mytable;
 import com.model.Reservation;
 import com.model.ReservationId;
 import com.service.ClientService;
@@ -36,11 +38,35 @@ public class ReservationController {
         return "reservations/reservations_form";   // <— ici
     }
 
-    @PostMapping
-    public String saveReservation(@ModelAttribute Reservation reservation) {
+    @PostMapping("/save")
+
+    public String saveReservation(@RequestParam("clientId") Integer clientId,
+                                  @RequestParam("tableId") Integer tableId,
+                                  @ModelAttribute Reservation reservation) {
+
+        // Utilisation de Optional avec gestion d'erreur
+        Client client = clientService.getClientById(clientId)
+                .orElseThrow(() -> new IllegalArgumentException("Client not found with id: " + clientId));
+
+        Mytable table = mytableService.getTableById(tableId)
+                .orElseThrow(() -> new IllegalArgumentException("Table not found with id: " + tableId));
+
+        // Clé composite
+        ReservationId reservationId = new ReservationId();
+        reservationId.setIdClient(clientId);
+        reservationId.setIdTab(tableId);
+        reservation.setId(reservationId);
+
+        // Associer les entités
+        reservation.setClient(client);
+        reservation.setMytable(table);
+
+        // Enregistrer
         reservationService.saveReservation(reservation);
+
         return "redirect:/reservations";
     }
+
 
     // Dans ReservationController
     @GetMapping("/edit/{idClient}/{idTab}")

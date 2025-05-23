@@ -1,11 +1,11 @@
 <script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
+    var gk_isXlsx = false;
+    var gk_xlsxFileLookup = {};
+    var gk_fileData = {};
+    function filledCell(cell) {
+        return cell !== '' && cell != null;
+    }
+    function loadFileData(filename) {
         if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
             try {
                 var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
@@ -19,11 +19,11 @@
 
                 // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
                 var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                    row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
                 );
                 // Fallback
                 if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
+                    headerRowIndex = 0;
                 }
 
                 // Convert filtered JSON back to CSV
@@ -36,8 +36,8 @@
             }
         }
         return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+    }
+</script><!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
@@ -45,30 +45,30 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-100">
-    <div th:replace="~{navbar :: navbar}"></div>
-    <div class="container mx-auto p-4">
-        <h1 class="text-2xl font-bold mb-4" th:text="${plat.idPlat} ? 'Edit Dish' : 'Add Dish'"></h1>
-        <form th:action="@{/plats}" th:object="${plat}" method="post" class="bg-white p-4 shadow-md rounded">
-            <input type="hidden" th:field="*{idPlat}">
-            <div class="mb-4">
-                <label class="block text-sm font-bold mb-2">Name</label>
-                <input type="text" th:field="*{name}" class="w-full p-2 border rounded" required>
-            </div>
-            <div class="mb-4">
-                <label class="block text-sm font-bold mb-2">Price</label>
-                <input type="number" step="0.01" th:field="*{prixPlat}" class="w-full p-2 border rounded" required>
-            </div>
-            <div class="mb-4">
-                <label class="block text-sm font-bold mb-2">Description</label>
-                <textarea th:field="*{description}" class="w-full p-2 border rounded" required></textarea>
-            </div>
-            <div class="mb-4">
-                <label class="block text-sm font-bold mb-2">Review</label>
-                <textarea th:field="*{avis}" class="w-full p-2 border rounded"></textarea>
-            </div>
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Save</button>
-            <a th:href="@{/plats}" class="bg-gray-500 text-white px-4 py-2 rounded ml-2">Cancel</a>
-        </form>
-    </div>
+<div th:replace="~{navbar :: navbar}"></div>
+<div class="container mx-auto p-4">
+    <h1 class="text-2xl font-bold mb-4" th:text="${plat.idPlat} ? 'Edit Dish' : 'Add Dish'"></h1>
+    <form th:action="@{/plats}" th:object="${plat}" method="post" class="bg-white p-4 shadow-md rounded">
+        <input type="hidden" th:field="*{idPlat}">
+        <div class="mb-4">
+            <label class="block text-sm font-bold mb-2">Name</label>
+            <input type="text" th:field="*{name}" class="w-full p-2 border rounded" required>
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm font-bold mb-2">Price</label>
+            <input type="number" step="0.01" th:field="*{prixPlat}" class="w-full p-2 border rounded" required>
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm font-bold mb-2">Description</label>
+            <textarea th:field="*{description}" class="w-full p-2 border rounded" required></textarea>
+        </div>
+        <div class="mb-4">
+            <label class="block text-sm font-bold mb-2">Review</label>
+            <textarea th:field="*{avis}" class="w-full p-2 border rounded"></textarea>
+        </div>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Save</button>
+        <a th:href="@{/plats}" class="bg-gray-500 text-white px-4 py-2 rounded ml-2">Cancel</a>
+    </form>
+</div>
 </body>
 </html>
